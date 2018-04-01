@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<div class="div">1</div>
+<div class="div">2</div>
+<div class="div">3</div>
+<div class="div">4</div>
+<script type="text/javascript">
+var divs = document.getElementsByClassName('div');
+for (var i = 0; i < divs.length; i++) {
+	divs[i].onclick = function(){
+		console.log(i);
+	}
+}
+//采用立即执行函数，将执行结果返回，效果同上
+for (var i = 0; i < divs.length; i++) {
+	divs[i].onclick = (function(){
+		return function(){
+			console.log(i);
+		}
+	})();
+}
+//在2写法基础上，考虑如何让每一次的i值保存下来，基于函数参数按值传递
+for (var i = 0; i < divs.length; i++) {
+	divs[i].onclick = (function(index){
+		return function(){
+			console.log(index);
+		}
+	})(i);
+}
+
+(function outer(index){
+	return divs[i].onclick = function(){//outer function
+		console.log(index);//inner function
+	}
+})(i);
+
+
+divs[i].onclick = function(index){//outer function
+	console.log(index);//inner function
+}(i);
+
+var outer = function(index){
+	var inner = function(){
+		return index++;
+	}
+	return inner;
+}
+var handle = outer(1);
+handle();
+
+
+var fn = function(){
+	var i=1;
+	return i++;
+}
+//函数执行完，局部变量被销毁，无法实现累加
+fn();//1
+fn();//1
+
+
+var fn1 = function(){
+	var i=1;
+	return function(){
+		return i++;
+	}
+}
+var fn = fn1();
+//函数执行完，局部变量没有被销毁，仍然保存在内存中，因此可以实现累加
+fn();//1
+fn();//2
+/*
+	当执行fn函数时，其实是调用函数fn2，此时寻找变量i的值，在函数fn2的作用域中找不到这个值，就顺着作用域链向上一级作用域找，在父级作用域fn1找到i且值为1，因此返回1。
+	fn函数执行完毕，作用域不会被销毁，而是将i=1保存在内存中，因此当再一次执行fn时，则在上一次执行的结果上在累加
+ */
+</script>
+</body>
+</html>
